@@ -1295,6 +1295,16 @@ func (ev *evaluator) eval(expr parser.Expr) (parser.Value, storage.Warnings) {
 		// Process all the calls for one time series at a time.
 		it := storage.NewBuffer(selRange)
 		for i, s := range selVS.Series {
+
+			// Cosven: log point so that we can why there is only one point in sum(rate()).
+			level.Debug(ev.logger).Log("msg", "record the points in this seria",
+				"labels", s.Labels().String())
+			tmpIt := s.Iterator()
+			for tmpIt.Next() {
+				ts, val := tmpIt.At()
+				level.Debug(ev.logger).Log("ts", ts, "val", val)
+			}
+
 			ev.currentSamples -= len(points)
 			points = points[:0]
 			it.Reset(s.Iterator())
